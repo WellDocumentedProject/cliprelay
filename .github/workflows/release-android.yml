@@ -19,6 +19,7 @@ jobs:
   release:
     if: inputs.version != '' && !inputs.promote
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - uses: actions/checkout@v6
         with:
@@ -111,6 +112,7 @@ jobs:
   promote:
     if: github.event_name == 'workflow_dispatch' && inputs.promote
     runs-on: ubuntu-latest
+    environment: prod
     steps:
       - uses: actions/checkout@v6
 
