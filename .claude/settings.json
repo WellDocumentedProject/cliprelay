@@ -18,6 +18,6 @@
     ]
   },
   "enabledPlugins": {
-    "rwx@rwx": true
+    "rwx@rwx": false
   }
 }
