@@ -102,6 +102,9 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    // android.util.Log is not available on the JVM; without this flag, any unit
+    // test that exercises code calling Log.* would throw a RuntimeException.
+    // returnDefaultValues makes the stub methods return 0/null instead.
     testOptions {
         unitTests.isReturnDefaultValues = true
     }
