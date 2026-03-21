@@ -3,6 +3,7 @@
 .gradle/
 .gradle-local/
 .vscode/
+.cursor/
 build/
 **/build/
 macos/ClipRelayMac/.build/
