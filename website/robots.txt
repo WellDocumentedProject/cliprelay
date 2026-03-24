@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://cliprelay.io/sitemap.xml
+Sitemap: https://cliprelay.org/sitemap.xml

@@ -146,7 +146,7 @@ build_mac() {
   <key>LSUIElement</key>
   <true/>
   <key>SUFeedURL</key>
-  <string>https://raw.githubusercontent.com/geekflyer/cliprelay/sparkle/appcast.xml</string>
+  <string>https://updates.cliprelay.org/appcast.xml</string>
   <key>SUScheduledCheckInterval</key>
   <integer>7200</integer>
   ${SPARKLE_PLIST_KEYS}
