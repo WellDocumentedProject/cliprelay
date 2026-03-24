@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <strong>Universal clipboard for Android and Mac</strong><br>
+  <strong>Clipboard sharing between Android and Mac</strong><br>
   Encrypted, Bluetooth-only, no cloud.
 </p>
 

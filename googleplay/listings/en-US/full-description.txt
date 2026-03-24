@@ -1,18 +1,16 @@
-ClipRelay is a universal clipboard across Android and Mac, powered by Bluetooth Low Energy. Copy on one device, paste on the other — instantly.
+Copy on your Android, paste on your Mac — instantly. ClipRelay syncs your clipboard over Bluetooth, with no cloud or servers involved.
 
-No cloud. No servers. No internet required. Your clipboard data never leaves your devices.
+📲 HOW IT WORKS
+1. Scan a QR code to pair with your Mac
+2. ClipRelay runs quietly in the background
+3. Copy on either device, paste on the other
 
-HOW IT WORKS
-• Pair your Android phone with your Mac by scanning a QR code
-• ClipRelay runs in the background on both devices
-• Copy text on either device and it appears on the other within seconds
+🔒 PRIVATE BY DESIGN
+• End-to-end encrypted (AES-256-GCM)
+• Direct Bluetooth — no servers, no cloud, no accounts
+• Works offline — no internet needed
 
-PRIVACY FIRST
-• Direct Bluetooth connection — no data goes through any server
-• End-to-end encrypted with AES-256-GCM
-• No accounts, no sign-up, no tracking
-
-FEATURES
-• Instant clipboard sync over Bluetooth Low Energy
-• Dead simple setup - Pair with your mac with a QR code - done!
-• Works offline — no internet connection needed
+✨ FEATURES
+• Instant text sync over Bluetooth Low Energy
+• Image sync (PNG & JPEG, up to 10 MB)
+• Dead simple QR code setup

@@ -3,16 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClipRelay — Universal clipboard for Android and Mac</title>
-  <meta name="description" content="ClipRelay — universal clipboard across Android and Mac. End-to-end encrypted. Bluetooth only. No cloud or servers.">
+  <title>ClipRelay — Clipboard sharing between Android and Mac</title>
+  <meta name="description" content="ClipRelay — clipboard sharing between Android and Mac. End-to-end encrypted. Bluetooth only. No cloud or servers.">
   <meta name="theme-color" content="#111820">
 
+  <!-- Canonical -->
+  <link rel="canonical" href="https://cliprelay.org/">
+
   <!-- Open Graph -->
-  <meta property="og:title" content="ClipRelay — Universal clipboard for Android & Mac">
-  <meta property="og:description" content="Universal clipboard across Android and Mac. End-to-end encrypted over Bluetooth. Cloud free.">
+  <meta property="og:title" content="ClipRelay — Clipboard sharing for Android & Mac">
+  <meta property="og:description" content="Clipboard sharing between Android and Mac. End-to-end encrypted over Bluetooth. Cloud free.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://cliprelay.org">
   <meta property="og:image" content="https://cliprelay.org/assets/og-image.png">
+
 
   <!-- Favicon -->
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -68,6 +72,8 @@
     </div>
   </nav>
 
+  <main>
+
   <!-- ════════════════════════════════════ Hero ════════════════════════════════════ -->
   <section class="hero" id="download">
     <div class="hero-glow"></div>
@@ -112,7 +118,7 @@
       </g>
     </svg>
 
-    <h1>Universal clipboard<br>for<br>Android and Mac</h1>
+    <h1>Seamless clipboard sharing<br>between<br>Android and Mac</h1>
     <p class="hero-subtitle">End-to-end encrypted. Bluetooth only. Cloud free.</p>
 
     <div class="hero-ctas">
@@ -148,7 +154,7 @@
               <path d="M94 30 A 36 36 0 0 1 94 88" stroke="#00FFD5" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.3"/>
             </svg>
             <div class="app-name">ClipRelay</div>
-            <div class="app-desc">Universal clipboard with your Mac</div>
+            <div class="app-desc">Clipboard sharing with your Mac</div>
             <div class="app-divider"></div>
             <div class="app-conn">
               <div class="app-node">
@@ -271,7 +277,7 @@
     <div class="container">
       <div class="section-header reveal">
         <span class="section-label">Features</span>
-        <h2 class="section-title">Privacy-first universal clipboard</h2>
+        <h2 class="section-title">Privacy-first clipboard sync</h2>
         <p class="section-subtitle">Built from the ground up to keep your data off the cloud and on your devices.</p>
       </div>
 
@@ -519,6 +525,8 @@
     </div>
   </section>
 
+  </main>
+
   <!-- ════════════════════════════════════ Footer ════════════════════════════════════ -->
   <footer class="footer">
     <div class="container">
@@ -544,7 +552,7 @@
             </svg>
             ClipRelay
           </div>
-          <p class="footer-tagline">Universal clipboard for Android and Mac — encrypted, Bluetooth-only, no cloud.</p>
+          <p class="footer-tagline">Encrypted clipboard sharing between Android and Mac over Bluetooth.</p>
         </div>
 
         <div class="footer-col">
@@ -577,6 +585,105 @@
       </div>
     </div>
   </footer>
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ClipRelay",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "macOS, Android",
+    "description": "Clipboard sharing between Android and Mac. End-to-end encrypted over Bluetooth. No cloud, no servers.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "url": "https://cliprelay.org",
+    "downloadUrl": "https://play.google.com/store/apps/details?id=org.cliprelay"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is my clipboard data sent to any servers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. ClipRelay uses Bluetooth Low Energy (BLE) for a direct device-to-device connection. Your clipboard data never touches a server, cloud service, or the internet. It goes straight from one device to the other."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How secure is the encryption?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ClipRelay uses AES-256-GCM encryption — the same standard used by banks and governments. Encryption keys are exchanged during the QR code pairing process and are stored locally on your devices. They are never transmitted or stored elsewhere."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is my data secure over Bluetooth?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ClipRelay encrypts all data with AES-256-GCM before it ever leaves your device. Bluetooth Low Energy is just the transport — by the time anything hits the airwaves, it's already ciphertext. Even in the unlikely event someone intercepts your BLE traffic, they get encrypted bytes with no way to derive the key."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the range?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "BLE typically works within 10-15 meters (30-50 feet) depending on your environment and devices. It works best when devices are in the same room, which is the typical use case for clipboard sharing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What types of content can I sync?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "ClipRelay syncs plain text (URLs, code snippets, passwords, addresses, etc.) over Bluetooth. With the experimental Image Sync feature enabled, you can also transfer images (PNG & JPEG, up to 10 MB) — these are sent over a temporary local WiFi connection for speed, while BLE handles the signaling."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does it work without WiFi?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! Text clipboard sync uses Bluetooth Low Energy, which is completely independent of WiFi and cellular data. It works in airplane mode, offline, or anywhere — as long as Bluetooth is enabled on both devices. The experimental Image Sync feature does require both devices to be on the same WiFi network."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What are the system requirements?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "macOS 13 (Ventura) or later, and Android 11 or later. Both devices need Bluetooth Low Energy support, which is standard on all modern Macs and Android devices."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What permissions does ClipRelay need?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Almost none. The Android app requests Bluetooth Low Energy and notification permissions. If you enable the experimental Auto-Copy feature, it also needs the Accessibility Service permission to detect copy actions. If you enable Image Sync, local network access is used for the image transfer. The Mac app runs in Apple's App Sandbox with Bluetooth and local network as its entitlements."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is ClipRelay free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, ClipRelay is completely free. There are no ads, subscriptions, or hidden fees."
+        }
+      }
+    ]
+  }
+  </script>
 
   <script src="js/main.js"></script>
   <script src="js/download.js"></script>

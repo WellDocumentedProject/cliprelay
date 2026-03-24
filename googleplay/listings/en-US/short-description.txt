@@ -1,1 +1,1 @@
-Universal clipboard for Android and Mac. Bluetooth-only, no cloud.
+Share your clipboard with your Mac. Bluetooth-only, no cloud.
