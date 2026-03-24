@@ -38,7 +38,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var awaitingNewPairingConnection = false
     private var hasShownBluetoothAlert = false
     private var bluetoothOffDebounceTimer: Timer?
-    private static let bluetoothOffDebounceDelay: TimeInterval = 5.0
+    private static let bluetoothOffDebounceDelay: TimeInterval = 60.0
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         notificationManager.requestAuthorization()
@@ -395,10 +395,9 @@ extension AppDelegate: ConnectionManagerDelegate {
                 self.statusBarController.setBluetoothWarning(nil)
                 self.hasShownBluetoothAlert = false
             case .poweredOff:
-                self.statusBarController.setBluetoothWarning("Bluetooth is turned off")
-                // Debounce: wait before showing the modal alert.
-                // macOS transiently reports poweredOff during sleep/wake cycles;
-                // if BT comes back within the window, the alert is cancelled.
+                // Debounce: macOS transiently reports poweredOff during sleep/wake cycles.
+                // Delay both the status bar warning and the modal alert so they don't
+                // flash during normal wake-from-sleep.
                 if !self.hasShownBluetoothAlert && self.bluetoothOffDebounceTimer == nil {
                     self.bluetoothOffDebounceTimer = Timer.scheduledTimer(
                         withTimeInterval: Self.bluetoothOffDebounceDelay, repeats: false
@@ -406,6 +405,7 @@ extension AppDelegate: ConnectionManagerDelegate {
                         guard let self else { return }
                         self.bluetoothOffDebounceTimer = nil
                         self.hasShownBluetoothAlert = true
+                        self.statusBarController.setBluetoothWarning("Bluetooth is turned off")
                         self.showBluetoothAlert(
                             message: "Bluetooth is turned off",
                             info: "ClipRelay needs Bluetooth to sync your clipboard. Please enable Bluetooth in System Settings."
