@@ -14,6 +14,8 @@ final class StatusBarController {
     var isImageSyncEnabled: (() -> Bool)?
     var isDeviceConnected: (() -> Bool)?
 
+    private var availableUpdateVersion: String?
+
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let menu = NSMenu()
     private let updaterController: SPUStandardUpdaterController
@@ -111,6 +113,11 @@ final class StatusBarController {
 
     // MARK: - Menu rendering
 
+    func setAvailableUpdateVersion(_ version: String?) {
+        availableUpdateVersion = version
+        renderMenu()
+    }
+
     private func renderMenu() {
         menu.removeAllItems()
 
@@ -175,7 +182,13 @@ final class StatusBarController {
         websiteItem.target = self
         menu.addItem(websiteItem)
 
-        let checkForUpdatesItem = NSMenuItem(title: "Check for Updates\u{2026}", action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)), keyEquivalent: "")
+        let updateTitle: String
+        if let version = availableUpdateVersion {
+            updateTitle = "Update Available (\(version))"
+        } else {
+            updateTitle = "Check for Updates\u{2026}"
+        }
+        let checkForUpdatesItem = NSMenuItem(title: updateTitle, action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)), keyEquivalent: "")
         checkForUpdatesItem.target = updaterController
         menu.addItem(checkForUpdatesItem)
 

@@ -6,6 +6,7 @@ import CryptoKit
 import os
 import ServiceManagement
 import Sparkle
+import UserNotifications
 
 private let appLogger = Logger(subsystem: "org.cliprelay", category: "App")
 
@@ -53,10 +54,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             updaterController.updater.checkForUpdatesInBackground()
         }
 
+        UNUserNotificationCenter.current().delegate = updaterDriverDelegate
         notificationManager.requestAuthorization()
         pairingManager.removePendingDevices()
         enableLaunchAtLoginIfFirstRun()
 
+        updaterDriverDelegate.onUpdateAvailabilityChanged = { [weak self] in
+            guard let self else { return }
+            DispatchQueue.main.async {
+                self.statusBarController.setAvailableUpdateVersion(
+                    self.updaterDriverDelegate.availableUpdateVersion)
+            }
+        }
         statusBarController.onPairNewDeviceRequested = { [weak self] in
             self?.startPairing()
         }
