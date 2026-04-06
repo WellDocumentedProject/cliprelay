@@ -149,7 +149,7 @@ final class StatusBarController {
         )
         launchItem.target = self
         if isLaunchAtLoginEnabled?() == true {
-            launchItem.image = NSImage(systemSymbolName: "checkmark", accessibilityDescription: "enabled")
+            launchItem.state = .on
         }
         menu.addItem(launchItem)
 
@@ -163,7 +163,7 @@ final class StatusBarController {
         if !deviceConnected {
             imageSyncItem.isEnabled = false
         } else if isImageSyncEnabled?() == true {
-            imageSyncItem.image = NSImage(systemSymbolName: "checkmark", accessibilityDescription: "enabled")
+            imageSyncItem.state = .on
         }
         menu.addItem(imageSyncItem)
 
@@ -199,9 +199,20 @@ final class StatusBarController {
         )
         autoUpdateItem.target = self
         if updaterController.updater.automaticallyChecksForUpdates {
-            autoUpdateItem.image = NSImage(systemSymbolName: "checkmark", accessibilityDescription: "enabled")
+            autoUpdateItem.state = .on
         }
         menu.addItem(autoUpdateItem)
+
+        let betaItem = NSMenuItem(
+            title: "Beta Channel",
+            action: #selector(handleToggleBetaUpdates),
+            keyEquivalent: ""
+        )
+        betaItem.target = self
+        if isBetaChannelEnabled {
+            betaItem.state = .on
+        }
+        menu.addItem(betaItem)
 
         menu.addItem(NSMenuItem.separator())
 
@@ -298,6 +309,27 @@ final class StatusBarController {
     @objc
     private func handleToggleAutoUpdates() {
         updaterController.updater.automaticallyChecksForUpdates.toggle()
+        renderMenu()
+    }
+
+    private var isBetaChannelEnabled: Bool {
+        let channels = UserDefaults.standard.stringArray(forKey: "SUDefaultChannels") ?? []
+        return channels.contains("beta")
+    }
+
+    @objc
+    private func handleToggleBetaUpdates() {
+        var channels = UserDefaults.standard.stringArray(forKey: "SUDefaultChannels") ?? []
+        if isBetaChannelEnabled {
+            channels.removeAll { $0 == "beta" }
+        } else {
+            channels.append("beta")
+        }
+        if channels.isEmpty {
+            UserDefaults.standard.removeObject(forKey: "SUDefaultChannels")
+        } else {
+            UserDefaults.standard.set(channels, forKey: "SUDefaultChannels")
+        }
         renderMenu()
     }
 
