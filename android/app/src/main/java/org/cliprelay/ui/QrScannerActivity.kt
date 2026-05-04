@@ -1,111 +1,193 @@
 package org.cliprelay.ui
 
-// Launches the ML Kit barcode scanner for QR-based pairing with the Mac app.
+// QR scanner using CameraX and ML Kit standalone (no Google Play Services required).
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.view.View
+import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.*
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.common.InputImage
 import org.cliprelay.R
 import org.cliprelay.pairing.PairingUriParser
 import org.cliprelay.service.ClipRelayService
-import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
-import com.google.mlkit.vision.barcode.common.Barcode
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class QrScannerActivity : AppCompatActivity() {
     companion object {
-        private const val MODULE_RETRY_DELAY_MS = 1_500L
-        private const val MAX_MODULE_RETRIES = 20
+        private const val TAG = "QrScannerActivity"
+        private const val CAMERA_PERMISSION_REQUEST_CODE = 1001
     }
 
-    private val handler = Handler(Looper.getMainLooper())
-    private var moduleRetryCount = 0
-
-    private lateinit var loadingTitle: TextView
-    private lateinit var loadingSubtitle: TextView
+    private lateinit var cameraExecutor: ExecutorService
+    private lateinit var previewView: PreviewView
     private lateinit var loadingRetry: TextView
+    private var isScanning = true
+
+    private val barcodeScanner = BarcodeScanning.getClient(
+        BarcodeScannerOptions.Builder()
+            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+            .build()
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_qr_scanner_loading)
-        loadingTitle = findViewById(R.id.qrLoadingTitle)
-        loadingSubtitle = findViewById(R.id.qrLoadingSubtitle)
+
+        previewView = findViewById(R.id.previewView)
         loadingRetry = findViewById(R.id.qrLoadingRetry)
-        launchScanner()
+        cameraExecutor = Executors.newSingleThreadExecutor()
+
+        if (checkCameraPermission()) {
+            startCamera()
+        } else {
+            requestCameraPermission()
+        }
     }
 
     override fun onDestroy() {
-        handler.removeCallbacksAndMessages(null)
         super.onDestroy()
+        cameraExecutor.shutdown()
+        barcodeScanner.close()
     }
 
-    private fun launchScanner() {
-        val options = GmsBarcodeScannerOptions.Builder()
-            .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-            .enableAutoZoom()
-            .build()
-
-        val scanner = GmsBarcodeScanning.getClient(this, options)
-        scanner.startScan()
-            .addOnSuccessListener { barcode ->
-                val rawValue = barcode.rawValue
-                if (rawValue != null) {
-                    handleScannedValue(rawValue)
-                } else {
-                    Toast.makeText(this, "No data in QR code", Toast.LENGTH_SHORT).show()
-                    finish()
-                }
-            }
-            .addOnCanceledListener {
-                handler.removeCallbacksAndMessages(null)
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == CAMERA_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startCamera()
+            } else {
+                Toast.makeText(
+                    this,
+                    "Camera permission is required to scan QR codes",
+                    Toast.LENGTH_LONG
+                ).show()
                 finish()
             }
-            .addOnFailureListener { e ->
-                if (isBarcodeModulePendingError(e)) {
-                    retryWhenBarcodeModuleReady()
-                    return@addOnFailureListener
-                }
-                Toast.makeText(this, "Scan failed: ${e.message}", Toast.LENGTH_SHORT).show()
-                finish()
-            }
+        }
     }
 
-    private fun retryWhenBarcodeModuleReady() {
-        loadingTitle.text = getString(R.string.qr_loading_title)
-        loadingSubtitle.text = getString(R.string.qr_loading_subtitle)
+    private fun checkCameraPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.CAMERA
+        ) == PackageManager.PERMISSION_GRANTED
+    }
 
-        if (moduleRetryCount >= MAX_MODULE_RETRIES) {
-            Toast.makeText(
-                this,
-                getString(R.string.qr_module_still_downloading),
-                Toast.LENGTH_LONG
-            ).show()
-            finish()
+    private fun requestCameraPermission() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.CAMERA),
+            CAMERA_PERMISSION_REQUEST_CODE
+        )
+    }
+
+    private fun startCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+
+        cameraProviderFuture.addListener({
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+
+            // Preview
+            val preview = Preview.Builder()
+                .build()
+                .also {
+                    it.setSurfaceProvider(previewView.surfaceProvider)
+                }
+
+            // Image analysis for barcode scanning
+            val imageAnalyzer = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+                .also {
+                    it.setAnalyzer(cameraExecutor) { imageProxy ->
+                        processImageProxy(imageProxy)
+                    }
+                }
+
+            // Select back camera as a default
+            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+            try {
+                // Unbind use cases before rebinding
+                cameraProvider.unbindAll()
+
+                // Bind use cases to camera
+                cameraProvider.bindToLifecycle(
+                    this,
+                    cameraSelector,
+                    preview,
+                    imageAnalyzer
+                )
+            } catch (exc: Exception) {
+                Log.e(TAG, "Use case binding failed", exc)
+                Toast.makeText(this, "Failed to start camera", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }, ContextCompat.getMainExecutor(this))
+    }
+
+    @OptIn(ExperimentalGetImage::class)
+    private fun processImageProxy(imageProxy: ImageProxy) {
+        if (!isScanning) {
+            imageProxy.close()
             return
         }
 
-        moduleRetryCount += 1
-        loadingRetry.text = getString(R.string.qr_loading_retry, moduleRetryCount, MAX_MODULE_RETRIES)
-        loadingRetry.visibility = View.VISIBLE
-        handler.postDelayed({ launchScanner() }, MODULE_RETRY_DELAY_MS)
-    }
+        val mediaImage = imageProxy.image
+        if (mediaImage != null) {
+            val inputImage = InputImage.fromMediaImage(
+                mediaImage,
+                imageProxy.imageInfo.rotationDegrees
+            )
 
-    private fun isBarcodeModulePendingError(error: Exception): Boolean {
-        val message = error.message ?: return false
-        return message.contains("barcode module", ignoreCase = true) &&
-            message.contains("download", ignoreCase = true)
+            barcodeScanner.process(inputImage)
+                .addOnSuccessListener { barcodes ->
+                    for (barcode in barcodes) {
+                        val rawValue = barcode.rawValue
+                        if (rawValue != null) {
+                            handleScannedValue(rawValue)
+                            isScanning = false
+                            break
+                        }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Barcode scanning failed", e)
+                }
+                .addOnCompleteListener {
+                    // Important: close the imageProxy
+                    imageProxy.close()
+                }
+        } else {
+            imageProxy.close()
+        }
     }
 
     private fun handleScannedValue(rawValue: String) {
         val info = PairingUriParser.parse(rawValue)
         if (info == null) {
-            Toast.makeText(this, "Invalid pairing QR code", Toast.LENGTH_LONG).show()
-            finish()
+            runOnUiThread {
+                Toast.makeText(this, "Invalid pairing QR code", Toast.LENGTH_LONG).show()
+                isScanning = true
+            }
             return
         }
 
@@ -121,8 +203,10 @@ class QrScannerActivity : AppCompatActivity() {
         intent.action = ClipRelayService.ACTION_START_PAIRING
         startForegroundService(intent)
 
-        Toast.makeText(this, "Pairing\u2026", Toast.LENGTH_SHORT).show()
-        setResult(RESULT_OK)
-        finish()
+        runOnUiThread {
+            Toast.makeText(this, "Pairing\u2026", Toast.LENGTH_SHORT).show()
+            setResult(RESULT_OK)
+            finish()
+        }
     }
 }
